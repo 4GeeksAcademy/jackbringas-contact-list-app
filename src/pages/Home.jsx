@@ -1,28 +1,19 @@
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import React, { useEffect } from "react";
-import { ContactSubmit } from "./ContactSubmit.jsx";
-
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export const Home = () => {
   const { store, dispatch } = useGlobalReducer();
+  const [contactList, setContactsList] = useState([]);
 
   const createAgenda = () => {
-    const options = {
+    fetch("https://playground.4geeks.com/contact/agendas/jackbringas", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        slug: "username",
-        id: 0,
-      }),
-    };
-
-    fetch("https://playground.4geeks.com/contact/agendas/username", options)
+      headers: { "Content-Type": "application/json" },
+    })
       .then((resp) => {
         if (!resp.ok) {
-          console.log("Failed to create it, man. Don't know what to tell you...");
+          console.error("Failed to create agenda.");
         } else {
           getData();
         }
@@ -33,20 +24,19 @@ export const Home = () => {
   };
 
   const getData = () => {
-    fetch("https://playground.4geeks.com/contact/agendas/username/contacts")
+    fetch("https://playground.4geeks.com/contact/agendas/jackbringas/contacts")
       .then((resp) => {
-        console.log("Get data response:", resp);
         if (!resp.ok) {
           createAgenda();
           return null;
-        } else {
-          return resp.json();
         }
+        return resp.json();
       })
       .then((data) => {
+        dispatch({ type: "set_contact_list", payload: data.contacts });
+
         if (data) {
-          console.log("Get data:", data);
-        
+          setContactsList(data.contacts);
         }
       })
       .catch((error) => console.error("Error getting data:", error));
@@ -56,14 +46,50 @@ export const Home = () => {
     getData();
   }, []);
 
+ 
+  const defaultImages = {
+    "Aaron": "https://media.istockphoto.com/id/1200677760/es/foto/retrato-de-apuesto-joven-sonriente-con-los-brazos-cruzados.jpg?s=612x612&w=0&k=20&c=RhKR8pxX3y_YVe5CjrRnTcNFEGDryD2FVOcUT_w3m4w=",
+  };
+
   return (
     <div className="text-center mt-5">
-      <h1>Hello Rigo!!</h1>
-      <p>
-        <img src={rigoImageUrl} alt="Rigo Baby" />
-      </p>
-      
-      <ContactSubmit />
+      <Link to="/submit">
+        <button className="btn btn-success">Add New Contact</button>
+      </Link>
+
+      <div className="container">
+        {store.contactList.length > 0 ? (
+          store.contactList.map((item, index) => (
+            <div className="card my-2 p-3" key={index}>
+              <div className="d-flex align-items-center">
+                <img
+                  src={defaultImages[item.name] || "https://via.placeholder.com/100"}
+                  alt={item.name}
+                  className="rounded-circle me-3"
+                  style={{ width: "110px", height: "110px", objectFit: "cover" }}
+                />
+                <div>
+                  <h5>{item.name}</h5>
+                  <div>{item.phone || "No phone available"}</div>
+                  <div>{item.email || "No email available"}</div>
+                  <div>{item.address || "No address available"}</div>
+                  <Link to="/submit">
+                    <button
+                      onClick={
+                      ()=>{
+                        dispatch({type:"set_single_contact", payload: item})
+
+                      }}
+                    >Edit</button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No contacts available</p>
+        )}
+      </div>
     </div>
   );
 };
