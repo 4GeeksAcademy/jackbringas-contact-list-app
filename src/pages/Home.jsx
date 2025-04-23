@@ -1,95 +1,82 @@
+import React, { useEffect } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { ContactCard } from "./ContactCard.jsx";
+
 
 export const Home = () => {
   const { store, dispatch } = useGlobalReducer();
-  const [contactList, setContactsList] = useState([]);
 
-  const createAgenda = () => {
-    fetch("https://playground.4geeks.com/contact/agendas/jackbringas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((resp) => {
-        if (!resp.ok) {
-          console.error("Failed to create agenda.");
-        } else {
-          getData();
-        }
-        return resp.json();
-      })
-      .then((data) => console.log("Agenda created!", data))
-      .catch((error) => console.error("Error creating agenda:", error));
+  const getImage = (contact) => {
+    if (contact.image) return contact.image;
+    const fallback = Math.floor(Math.random() * 70) + 1;
+    return `https://i.pravatar.cc/150?img=${fallback}`;
   };
 
   const getData = () => {
     fetch("https://playground.4geeks.com/contact/agendas/jackbringas/contacts")
       .then((resp) => {
         if (!resp.ok) {
-          createAgenda();
+          console.error("Failed to fetch contacts.");
           return null;
         }
         return resp.json();
       })
       .then((data) => {
-        dispatch({ type: "set_contact_list", payload: data.contacts });
-
         if (data) {
-          setContactsList(data.contacts);
+          dispatch({ type: "set_contact_list", payload: data.contacts });
         }
       })
-      .catch((error) => console.error("Error getting data:", error));
+      .catch((error) => console.error("Error fetching data:", error));
   };
 
   useEffect(() => {
-    getData();
+    const setupAgenda = async () => {
+      try {
+        await fetch("https://playground.4geeks.com/contact/agendas/jackbringas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (error) {
+        console.error("Error creating agenda:", error);
+      }
+
+      getData();
+    };
+
+    setupAgenda();
   }, []);
 
- 
-  const defaultImages = {
-    "Aaron": "https://media.istockphoto.com/id/1200677760/es/foto/retrato-de-apuesto-joven-sonriente-con-los-brazos-cruzados.jpg?s=612x612&w=0&k=20&c=RhKR8pxX3y_YVe5CjrRnTcNFEGDryD2FVOcUT_w3m4w=",
+  const deleteContact = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this contact? 🗑️");
+    if (!confirmDelete) return;
+
+    try {
+      const resp = await fetch(`https://playground.4geeks.com/contact/agendas/jackbringas/contacts/${id}`, {
+        method: "DELETE",
+      });
+
+      if (resp.ok) {
+        alert("Contact successfully deleted ✅");
+        getData();
+      } else {
+        const errorData = await resp.json();
+        alert("Failed to delete contact: " + errorData.msg);
+      }
+    } catch (error) {
+      console.error("Error deleting contact:", error);
+      alert("An unexpected error occurred while deleting the contact.");
+    }
   };
 
   return (
-    <div className="text-center mt-5">
-      <Link to="/submit">
-        <button className="btn btn-success">Add New Contact</button>
-      </Link>
-
-      <div className="container">
-        {store.contactList.length > 0 ? (
-          store.contactList.map((item, index) => (
-            <div className="card my-2 p-3" key={index}>
-              <div className="d-flex align-items-center">
-                <img
-                  src={defaultImages[item.name] || "https://via.placeholder.com/100"}
-                  alt={item.name}
-                  className="rounded-circle me-3"
-                  style={{ width: "110px", height: "110px", objectFit: "cover" }}
-                />
-                <div>
-                  <h5>{item.name}</h5>
-                  <div>{item.phone || "No phone available"}</div>
-                  <div>{item.email || "No email available"}</div>
-                  <div>{item.address || "No address available"}</div>
-                  <Link to="/submit">
-                    <button
-                      onClick={
-                      ()=>{
-                        dispatch({type:"set_single_contact", payload: item})
-
-                      }}
-                    >Edit</button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>No contacts available</p>
-        )}
-      </div>
+    <div className="container my-4">
+      {store.contactList.length > 0 ? (
+        store.contactList.map((item, index) => (
+          <ContactCard key={index} contact={item} onDelete={deleteContact} />
+        ))
+      ) : (
+        <p className="text-center">No contacts found.</p>
+      )}
     </div>
   );
 };

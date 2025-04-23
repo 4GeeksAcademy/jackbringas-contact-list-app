@@ -1,0 +1,74 @@
+.neon-title {
+    color: white !important;
+    text-shadow:
+      0 0 3px #ff4df8,
+      0 0 6px #ff4df8,
+      0 0 12px #ff66cc,
+      0 0 20px #ff66cc;
+    font-weight: bold;
+  }
+  
+  .neon-title:hover {
+    color: white !important;
+    text-shadow:
+      0 0 5px #ff4df8,
+      0 0 12px #ff66cc,
+      0 0 25px #ff66cc;
+  }
+  
+.neon-heart {
+    color: #ff4df8;
+    text-shadow:
+      0 0 3px #ff4df8,
+      0 0 6px #ff66cc;
+    font-size: 1.4em;
+    font-weight: bold;
+  }
+  
+  /* Enlace rosa (como el "Back to Contacts") */
+  .back-link {
+    color: #ff4df8;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  .back-link:hover {
+    color: #e040c0;
+    text-decoration: underline;
+  }
+  
+  /* Botón rosa principal */
+  .btn-pink {
+    background-color: #ff4df8;
+    color: white;
+    border: none;
+  }
+  
+  .btn-pink:hover {
+    background-color: #e040c0;
+    color: white;
+  }
+  
+  /* Íconos de lápiz y papelera (sin borde) */
+  .icon-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1.4em;
+    cursor: pointer;
+    color: inherit;
+    transition: all 0.3s ease;
+  }
+  
+  /* Neón rosa al pasar el mouse */
+  .neon-icon:hover {
+    color: #ff4df8;
+    text-shadow:
+      0 0 5px #ff4df8,
+      0 0 10px #ff4df8,
+      0 0 20px #ff66cc,
+      0 0 40px #ff66cc;
+    transform: scale(1.15);
+  }
+  
