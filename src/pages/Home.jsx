@@ -40,10 +40,11 @@ export const Home = () => {
         console.error("Error creating agenda:", error);
       }
 
-      getData();
+      
     };
 
     setupAgenda();
+    getData();
   }, []);
 
   const deleteContact = async (id) => {
