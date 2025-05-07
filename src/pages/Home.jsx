@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { ContactCard } from "./ContactCard.jsx";
 
-
 export const Home = () => {
   const { store, dispatch } = useGlobalReducer();
 
@@ -22,7 +21,7 @@ export const Home = () => {
         return resp.json();
       })
       .then((data) => {
-        if (data) {
+        if (data?.contacts) {
           dispatch({ type: "set_contact_list", payload: data.contacts });
         }
       })
@@ -30,21 +29,20 @@ export const Home = () => {
   };
 
   useEffect(() => {
-    const setupAgenda = async () => {
+    const setupAndLoad = async () => {
       try {
         await fetch("https://playground.4geeks.com/contact/agendas/jackbringas", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
-      } catch (error) {
-        console.error("Error creating agenda:", error);
-      }
 
-      
+        getData(); // Solo se llama después de crear la agenda
+      } catch (error) {
+        console.error("Error setting up agenda:", error);
+      }
     };
 
-    setupAgenda();
-    getData();
+    setupAndLoad();
   }, []);
 
   const deleteContact = async (id) => {
@@ -72,8 +70,8 @@ export const Home = () => {
   return (
     <div className="container my-4">
       {store.contactList.length > 0 ? (
-        store.contactList.map((item, index) => (
-          <ContactCard key={index} contact={item} onDelete={deleteContact} />
+        store.contactList.map((item) => (
+          <ContactCard key={item.id} contact={item} onDelete={deleteContact} />
         ))
       ) : (
         <p className="text-center">No contacts found.</p>
